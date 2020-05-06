@@ -62,10 +62,10 @@ def shuffle_and_deal():
         the_board.append(card)
         i += 1
     list_of_hands = {1: player1_hand, 2: player2_hand, 3: player3_hand, 4: player4_hand, 5:player5_hand,6: player6_hand, 7: player7_hand, 8:player8_hand, 9:player9_hand, 10:player10_hand}
-    print("all hands", list_of_hands)
-    print("remaining deck", remaining_deck)
+    #print("all hands", list_of_hands)
+    #print("remaining deck", remaining_deck)
     game_board = pd.DataFrame(np.array(the_board).reshape(4, 1))
-    print("game board\n", game_board)
+    #print("game board\n", game_board)
 
     cards_in_play_this_round = {}
     pd.to_pickle(cards_in_play_this_round, ".cards_in_play_this_round.pkl")
@@ -74,7 +74,7 @@ def shuffle_and_deal():
 
 
 
-port = 8130
+port = 8138
 player_name = input("Howdy! Enter your name: ")
 
 
@@ -102,6 +102,10 @@ data_int = pickle.loads(data)
 print("You're player:", data_int)
 players = pd.read_pickle(".players.pkl")
 
+# initialize dealing
+dealt = False
+pd.to_pickle(dealt,".dealt.pkl")
+
 players.update({data_int:player_name})
 pd.to_pickle(players,".players.pkl")
 players = pd.read_pickle(".players.pkl")
@@ -122,9 +126,24 @@ highest_score_redux_2 = highest_score_redux_2.replace("(","").replace(",","").re
 
 # get a new game board and hands from the server.
 times_through = 0
+dealt = False
 while int(highest_score_redux_2) < 66:
     if times_through > 0:
-        shuffle_and_deal()
+        # this simulates player one being the dealer.
+        # only one person should shuffle and deal and the other players should read in the pickle
+        # or the random function causes everyone to have a random hand which results in repating numbers
+        # as well as a random game board, different for each player which stops the game.
+        if int(data_int) == 1:
+            shuffle_and_deal()
+            print("Let's shuffle up and deal another round!")
+            dealer_is_done = True
+            pd.to_pickle(dealer_is_done,".dealt.pkl")
+
+        else:
+            print("Let's shuffle up and deal another round!")
+            while not dealt:
+                time.sleep(6)
+                dealt = pd.read_pickle(".dealt.pkl")
 
     # print the game board
     print("GAME BOARD:\n")
@@ -398,12 +417,12 @@ while int(highest_score_redux_2) < 66:
                                     score_tracker += score_string.count("*")
                                 score_loop += 1
                             print("Oh no, " + str(players_name[int(the_player) - 1]) + "! - You got Deep Sixed on row 1. For " + str(score_tracker) + " points.")
-                            scoreboard = pd.read_pickle(".scoreboard.pkl")
-                            current_score = scoreboard.get(players_name[int(the_player) - 1])
-                            # why is this coming back as none?
-                            current_score = int(current_score) + int(score_tracker)
-                            scoreboard.update({players_name[int(the_player) - 1]: current_score})
-                            pd.to_pickle(scoreboard, ".scoreboard.pkl")
+                            if players_name[int(the_player) - 1] == player_name:
+                                scoreboard = pd.read_pickle(".scoreboard.pkl")
+                                current_score = scoreboard.get(players_name[int(the_player) - 1])
+                                current_score = int(current_score) + int(score_tracker)
+                                scoreboard.update({players_name[int(the_player) - 1]: current_score})
+                                pd.to_pickle(scoreboard, ".scoreboard.pkl")
 
                             row_1 = []
                         row_1.append(int(card))
@@ -422,12 +441,12 @@ while int(highest_score_redux_2) < 66:
                                     score_tracker += score_string.count("*")
                                 score_loop += 1
                             print("Oh no, " + str(players_name[int(the_player) - 1]) + "! - You got Deep Sixed on row 2. For " + str(score_tracker) + " points.")
-                            scoreboard = pd.read_pickle(".scoreboard.pkl")
-                            current_score = scoreboard.get(players_name[int(the_player) - 1])
-                            # why is this coming back as none?
-                            current_score = int(current_score) + int(score_tracker)
-                            scoreboard.update({players_name[int(the_player) - 1]: current_score})
-                            pd.to_pickle(scoreboard, ".scoreboard.pkl")
+                            if players_name[int(the_player) - 1] == player_name:
+                                scoreboard = pd.read_pickle(".scoreboard.pkl")
+                                current_score = scoreboard.get(players_name[int(the_player) - 1])
+                                current_score = int(current_score) + int(score_tracker)
+                                scoreboard.update({players_name[int(the_player) - 1]: current_score})
+                                pd.to_pickle(scoreboard, ".scoreboard.pkl")
                             row_2 = []
                         row_2.append(int(card))
                     elif loop_list.index(n) == 2:
@@ -446,12 +465,12 @@ while int(highest_score_redux_2) < 66:
                                 score_loop += 1
                             print("Oh no, " + str(players_name[
                                 int(the_player) - 1]) + "! - You got Deep Sixed on row 3. For " + str(score_tracker) + " points.")
-                            scoreboard = pd.read_pickle(".scoreboard.pkl")
-                            current_score = scoreboard.get(players_name[int(the_player) - 1])
-                            # why is this coming back as none?
-                            current_score = int(current_score) + int(score_tracker)
-                            scoreboard.update({players_name[int(the_player) - 1]: current_score})
-                            pd.to_pickle(scoreboard, ".scoreboard.pkl")
+                            if players_name[int(the_player) - 1] == player_name:
+                                scoreboard = pd.read_pickle(".scoreboard.pkl")
+                                current_score = scoreboard.get(players_name[int(the_player) - 1])
+                                current_score = int(current_score) + int(score_tracker)
+                                scoreboard.update({players_name[int(the_player) - 1]: current_score})
+                                pd.to_pickle(scoreboard, ".scoreboard.pkl")
                             row_3 = []
                         row_3.append(int(card))
                     else:
@@ -470,19 +489,19 @@ while int(highest_score_redux_2) < 66:
                                 score_loop += 1
                             print("Oh no, " + players_name[
                                 int(the_player) - 1] + "! - You got Deep Sixed on row 4. For " + str(score_tracker) + " points.")
-                            scoreboard = pd.read_pickle(".scoreboard.pkl")
-                            current_score = scoreboard.get(players_name[int(the_player) - 1])
-                            # why is this coming back as none?
-                            current_score = int(current_score) + int(score_tracker)
-                            scoreboard.update({players_name[int(the_player) - 1]: current_score})
-                            pd.to_pickle(scoreboard, ".scoreboard.pkl")
+                            if players_name[int(the_player) - 1] == player_name:
+                                scoreboard = pd.read_pickle(".scoreboard.pkl")
+                                current_score = scoreboard.get(players_name[int(the_player) - 1])
+                                current_score = int(current_score) + int(score_tracker)
+                                scoreboard.update({players_name[int(the_player) - 1]: current_score})
+                                pd.to_pickle(scoreboard, ".scoreboard.pkl")
                             row_4 = []
                         row_4.append(int(card))
                 else:
                     # so only the player with the lower card gets to choose.
                     if players_name[int(the_player) - 1] == player_name:
                         row_cleaner = input("Oh no! Your card is less than every row! Which row are you going to take? ")
-                        print("row_cleaner",row_cleaner)
+                        #print("row_cleaner",row_cleaner)
                         pd.to_pickle(row_cleaner,".row_cleaner.pkl")
                         #pickle the row cleaner
                         # should I put a pickle here that gives the value of row_cleaner
@@ -522,12 +541,14 @@ while int(highest_score_redux_2) < 66:
                         print("Oh no, " + str(players_name[int(the_player) - 1]) + "'s card is less than every row. " +
                                 str(players_name[int(the_player) - 1]) + " took row number " + str(row_cleaner) +
                                 ". " + str(players_name[int(the_player) - 1]) + " took " + str(score_tracker) + " points.")
-                        scoreboard = pd.read_pickle(".scoreboard.pkl")
-                        current_score = scoreboard.get(players_name[int(the_player) - 1])
                         # why is this coming back as none?
-                        current_score = int(current_score) + int(score_tracker)
-                        scoreboard.update({players_name[int(the_player) - 1]: current_score})
-                        pd.to_pickle(scoreboard, ".scoreboard.pkl")
+                        # only record this score if it is my score!!
+                        if players_name[int(the_player) - 1] == player_name:
+                            scoreboard = pd.read_pickle(".scoreboard.pkl")
+                            current_score = scoreboard.get(players_name[int(the_player) - 1])
+                            current_score = int(current_score) + int(score_tracker)
+                            scoreboard.update({players_name[int(the_player) - 1]: current_score})
+                            pd.to_pickle(scoreboard, ".scoreboard.pkl")
 
                         row_1 = []
                         row_1.append(int(card))
@@ -546,12 +567,12 @@ while int(highest_score_redux_2) < 66:
                         print("Oh no, " + str(players_name[int(the_player) - 1]) + "'s card is less than every row. " +
                               str(players_name[int(the_player) - 1]) + " took row number " + str(row_cleaner) +
                               ". " + str(players_name[int(the_player) - 1]) + " took " + str(score_tracker) + " points.")
-                        scoreboard = pd.read_pickle(".scoreboard.pkl")
-                        current_score = scoreboard.get(players_name[int(the_player) - 1])
-                        # why is this coming back as none?
-                        current_score = int(current_score) + int(score_tracker)
-                        scoreboard.update({players_name[int(the_player) - 1]: current_score})
-                        pd.to_pickle(scoreboard, ".scoreboard.pkl")
+                        if players_name[int(the_player) - 1] == player_name:
+                            scoreboard = pd.read_pickle(".scoreboard.pkl")
+                            current_score = scoreboard.get(players_name[int(the_player) - 1])
+                            current_score = int(current_score) + int(score_tracker)
+                            scoreboard.update({players_name[int(the_player) - 1]: current_score})
+                            pd.to_pickle(scoreboard, ".scoreboard.pkl")
 
                         row_2 = []
                         row_2.append(int(card))
@@ -572,13 +593,12 @@ while int(highest_score_redux_2) < 66:
                               str(players_name[int(the_player) - 1]) + " took row number " + str(row_cleaner) +
                               ". " + str(players_name[int(the_player) - 1]) + " took " + str(score_tracker) + " points.")
 
-
-                        scoreboard = pd.read_pickle(".scoreboard.pkl")
-                        current_score = scoreboard.get(players_name[int(the_player) - 1])
-                        #why is this coming back as none?
-                        current_score = int(current_score) + int(score_tracker)
-                        scoreboard.update({players_name[int(the_player) - 1]: current_score})
-                        pd.to_pickle(scoreboard,".scoreboard.pkl")
+                        if players_name[int(the_player) - 1] == player_name:
+                            scoreboard = pd.read_pickle(".scoreboard.pkl")
+                            current_score = scoreboard.get(players_name[int(the_player) - 1])
+                            current_score = int(current_score) + int(score_tracker)
+                            scoreboard.update({players_name[int(the_player) - 1]: current_score})
+                            pd.to_pickle(scoreboard, ".scoreboard.pkl")
                         row_3 = []
                         row_3.append(int(card))
                         #print(scoreboard)
@@ -597,11 +617,12 @@ while int(highest_score_redux_2) < 66:
                         print("Oh no, " + str(players_name[int(the_player) - 1]) + "'s card is less than every row. " +
                               str(players_name[int(the_player) - 1]) + " took row number " + str(row_cleaner) +
                               ". " + str(players_name[int(the_player) - 1]) + " took " + str(score_tracker) + " points.")
-                        scoreboard = pd.read_pickle(".scoreboard.pkl")
-                        current_score = scoreboard.get(players_name[int(the_player) - 1])
-                        current_score = int(current_score) + int(score_tracker)
-                        scoreboard.update({players_name[int(the_player) - 1]: current_score})
-                        pd.to_pickle(scoreboard, ".scoreboard.pkl")
+                        if players_name[int(the_player) - 1] == player_name:
+                            scoreboard = pd.read_pickle(".scoreboard.pkl")
+                            current_score = scoreboard.get(players_name[int(the_player) - 1])
+                            current_score = int(current_score) + int(score_tracker)
+                            scoreboard.update({players_name[int(the_player) - 1]: current_score})
+                            pd.to_pickle(scoreboard, ".scoreboard.pkl")
                         row_4 = []
                         row_4.append(int(card))
 
@@ -727,20 +748,20 @@ while int(highest_score_redux_2) < 66:
             j += 1
         print("\nYOUR HAND: ", pretty_hand_for_print, "\n")
 
-
-        sorted_scoreboard = sorted(scoreboard.items(), key=lambda x: x[1])
-        for i in range(len(sorted_scoreboard)):
+        scorez = pd.read_pickle(".scoreboard.pkl")
+        sorted_scorez = sorted(scorez.items(), key=lambda x: x[1])
+        for i in range(len(sorted_scorez)):
             rep, rep2 = "",""
-            rep = str(sorted_scoreboard[i])
+            rep = str(sorted_scorez[i])
             rep2 = rep.replace("'","").replace("(","").replace(")","").replace(",",":")
             print(rep2)
             i+=1
-        pd.to_pickle(scoreboard,".scoreboard.pkl")
+        pd.to_pickle(scorez,".scoreboard.pkl")
         print("\n")
 
-    scoreboard = pd.read_pickle(".scoreboard.pkl")
-    sorted_scoreboard = sorted(scoreboard.items(), key=lambda x: x[1])
-    highest_score = sorted_scoreboard[-1]
+    scorez2 = pd.read_pickle(".scoreboard.pkl")
+    sorted_scorez2 = sorted(scorez2.items(), key=lambda x: x[1])
+    highest_score = sorted_scorez2[-1]
     highest_score_redux = highest_score[1:2]
     highest_score_redux_2 = str(highest_score_redux)
     highest_score_redux_2 = highest_score_redux_2.replace("(", "").replace(",", "").replace(")", "")
