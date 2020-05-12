@@ -77,8 +77,7 @@ serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 # get local machine name
 host = socket.gethostname()
 
-port = 8013
-
+port = 8139
 # bind to the port
 serversocket.bind((host, port))
 
