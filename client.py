@@ -6,6 +6,8 @@ import time
 import numpy as np
 import random
 from io import StringIO
+import os.path
+from os import path
 
 def shuffle_and_deal():
     full_deck = [i for i in np.arange(1, 105)]
@@ -74,7 +76,10 @@ def shuffle_and_deal():
 
 
 
-port = 8138
+port = 8139
+host = input("Enter the server connection information: ")
+#host = input("Enter server address to connect: ")
+#host = '174.129.102.197'
 player_name = input("Howdy! Enter your name: ")
 
 
@@ -83,7 +88,7 @@ player_name = input("Howdy! Enter your name: ")
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 #get local machine name
-host = socket.gethostname()
+#host = socket.gethostname()
 #player_name = host
 print("Hi, " + player_name + "! Let's shuffle up and deal. \n")
 
@@ -100,7 +105,11 @@ data_int = pickle.loads(data)
 #data_int = pickle.load(data_string)
 # print the player's number and store their info
 print("You're player:", data_int)
-players = pd.read_pickle(".players.pkl")
+#do not read the players pickle as it may not exist yet
+if path.exists(host + "/.players.pkl"):
+    players = pd.read_pickle(".players.pkl")
+else:
+    players = {}
 
 # initialize dealing
 dealt = False
@@ -110,7 +119,11 @@ players.update({data_int:player_name})
 pd.to_pickle(players,".players.pkl")
 players = pd.read_pickle(".players.pkl")
 #print(players.values())
-scoreboard = pd.read_pickle(".scoreboard.pkl")
+if path.exists(".scoreboard.pkl"):
+    scoreboard = pd.read_pickle(".scoreboard.pkl")
+else:
+    scoreboard = {}
+
 score_tracker = 0
 scoreboard.update({player_name:0})
 pd.to_pickle(scoreboard,".scoreboard.pkl")
@@ -147,7 +160,7 @@ while int(highest_score_redux_2) < 66:
 
     # print the game board
     print("GAME BOARD:\n")
-    unpickled_df = pd.read_pickle(".board.pkl")
+    unpickled_df = pd.read_pickle(host + ":" + str(port) + "/~/.board.pkl")
     deck = unpickled_df.to_string(index=False, header=False)
     #print(deck,"\n")
     # initialize the game board
@@ -287,7 +300,16 @@ while int(highest_score_redux_2) < 66:
 
         #round 1
         round += 1
-        round_1_card = input("Round " + str(round) +": Which card do you want to play? ")
+        good_input = False
+        while not good_input:
+            round_1_card = input("Round " + str(round) +": Which card do you want to play? ")
+            for i in range(len(player_hand)):
+                if round_1_card == player_hand[i]:
+                    good_input = True
+                else:
+                    good_input = False
+            print("It looks like you may have entered bad input or a card not in your hand. Try again.")
+
         # remove the card from the player_hand (pop)
         #re-read the pickle
         for i in range(len(player_hand)):
