@@ -76,7 +76,7 @@ def shuffle_and_deal():
 
 
 
-port = 8140
+port = 8139
 #host = input("Enter the server connection information: ")
 #host = input("Enter server address to connect: ")
 host = socket.gethostname()
@@ -303,14 +303,14 @@ while int(highest_score_redux_2) < 66:
         good_input = False
         while not good_input:
             round_1_card = input("Round " + str(round) +": Which card do you want to play? ")
-            print(str(round_1_card))
             for i in range(len(player_hand)):
                 if str(round_1_card) == str(player_hand[i]):
                     good_input = True
                     break
                 else:
                     good_input = False
-            print("It looks like you may have entered bad input or a card not in your hand. Try again.")
+                    if i == len(player_hand):
+                        print("It looks like you may have entered bad input or a card not in your hand. Try again.")
 
         # remove the card from the player_hand (pop)
         #re-read the pickle
@@ -524,8 +524,14 @@ while int(highest_score_redux_2) < 66:
                 else:
                     # so only the player with the lower card gets to choose.
                     if players_name[int(the_player) - 1] == player_name:
-                        row_cleaner = input("Oh no! Your card is less than every row! Which row are you going to take? ")
-                        #print("row_cleaner",row_cleaner)
+                        row_match = False
+                        while not row_match:
+                            row_cleaner = input("Oh no! Your card is less than every row! Which row are you going to take? ")
+                            if str(row_cleaner) != '1' and str(row_cleaner) != '2' and str(row_cleaner) != '3' and str(row_cleaner) != '4':
+                                print("Please enter 1, 2, 3, or 4 to choose the row. ")
+                            else:
+                                row_match = True
+                                break
                         pd.to_pickle(row_cleaner,".row_cleaner.pkl")
                         #pickle the row cleaner
                         # should I put a pickle here that gives the value of row_cleaner
