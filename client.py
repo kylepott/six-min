@@ -76,10 +76,10 @@ def shuffle_and_deal():
 
 
 
-port = 8139
-host = input("Enter the server connection information: ")
+port = 8140
+#host = input("Enter the server connection information: ")
 #host = input("Enter server address to connect: ")
-#host = '174.129.102.197'
+host = socket.gethostname()
 player_name = input("Howdy! Enter your name: ")
 
 
@@ -106,7 +106,7 @@ data_int = pickle.loads(data)
 # print the player's number and store their info
 print("You're player:", data_int)
 #do not read the players pickle as it may not exist yet
-if path.exists(host + "/.players.pkl"):
+if path.exists(".players.pkl"):
     players = pd.read_pickle(".players.pkl")
 else:
     players = {}
@@ -160,7 +160,7 @@ while int(highest_score_redux_2) < 66:
 
     # print the game board
     print("GAME BOARD:\n")
-    unpickled_df = pd.read_pickle(host + ":" + str(port) + "/~/.board.pkl")
+    unpickled_df = pd.read_pickle(".board.pkl")
     deck = unpickled_df.to_string(index=False, header=False)
     #print(deck,"\n")
     # initialize the game board
@@ -303,9 +303,11 @@ while int(highest_score_redux_2) < 66:
         good_input = False
         while not good_input:
             round_1_card = input("Round " + str(round) +": Which card do you want to play? ")
+            print(str(round_1_card))
             for i in range(len(player_hand)):
-                if round_1_card == player_hand[i]:
+                if str(round_1_card) == str(player_hand[i]):
                     good_input = True
+                    break
                 else:
                     good_input = False
             print("It looks like you may have entered bad input or a card not in your hand. Try again.")
